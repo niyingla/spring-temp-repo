@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -38,9 +41,14 @@ public class DBConfiguration {
     }
 
     @Bean
-    @Primary
-    public JdbcTemplate userJdbcTemplate(@Qualifier("userDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
+        HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
+        hibernateJpaVendorAdapter.setGenerateDdl(false);
+        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+        factoryBean.setDataSource(userDataSource());
+        factoryBean.setJpaVendorAdapter(hibernateJpaVendorAdapter);
+        factoryBean.setPackagesToScan("com.pikaqiu.springboottx");
+        return factoryBean;
     }
 
     @Bean
@@ -58,12 +66,17 @@ public class DBConfiguration {
     public JdbcTemplate orderJdbcTemplate(@Qualifier("orderDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
+
     @Bean
     public PlatformTransactionManager transactionManager() {
-        DataSourceTransactionManager userTransactionManager = new DataSourceTransactionManager(userDataSource());
+
+//      DataSourceTransactionManager userTransactionManager = new (userDataSource());
+        JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
+        jpaTransactionManager.setEntityManagerFactory(entityManagerFactoryBean().getObject());
+
         DataSourceTransactionManager orderTransactionManager = new DataSourceTransactionManager(orderDataSource());
         //先后再前提交
-        return new ChainedTransactionManager(userTransactionManager, orderTransactionManager);
+        return new ChainedTransactionManager(jpaTransactionManager, orderTransactionManager);
     }
 
 }
