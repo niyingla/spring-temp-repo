@@ -41,7 +41,7 @@ public class DBConfiguration {
 
     @Bean
     //jpa的
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setGenerateDdl(false);
         LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
@@ -75,7 +75,7 @@ public class DBConfiguration {
 
 //      DataSourceTransactionManager userTransactionManager = new (userDataSource());
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(entityManagerFactoryBean().getObject());
+        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
 
         DataSourceTransactionManager orderTransactionManager = new DataSourceTransactionManager(orderDataSource());
         //先后再前提交
