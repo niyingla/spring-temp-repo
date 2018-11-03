@@ -15,6 +15,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 /**
@@ -27,7 +28,6 @@ import javax.sql.DataSource;
 public class DBConfiguration {
 
     @Bean
-    @Primary
     //会自动注入配置文件中的属性到这个类上
     @ConfigurationProperties("spring.ds.user")
     public DataSourceProperties userDataSourceProperties() {
@@ -35,12 +35,12 @@ public class DBConfiguration {
     }
 
     @Bean
-    @Primary
     public DataSource userDataSource() {
         return userDataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
     }
 
     @Bean
+    //jpa的
     public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
         HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
         hibernateJpaVendorAdapter.setGenerateDdl(false);
@@ -52,17 +52,20 @@ public class DBConfiguration {
     }
 
     @Bean
+    @Primary
     @ConfigurationProperties("spring.ds.order")
     public DataSourceProperties orderDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     @Bean
+    @Primary
     public DataSource orderDataSource() {
         return orderDataSourceProperties().initializeDataSourceBuilder().type(HikariDataSource.class).build();
     }
 
     @Bean
+    @Primary
     public JdbcTemplate orderJdbcTemplate(@Qualifier("orderDataSource") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
@@ -76,7 +79,7 @@ public class DBConfiguration {
 
         DataSourceTransactionManager orderTransactionManager = new DataSourceTransactionManager(orderDataSource());
         //先后再前提交
-        return new ChainedTransactionManager(jpaTransactionManager, orderTransactionManager);
+        return new ChainedTransactionManager(orderTransactionManager, jpaTransactionManager);
     }
 
 }

@@ -1,17 +1,37 @@
 package com.pikaqiu.springboottx.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  * Created by mavlarn on 2018/1/20.
  */
+@Entity(name = "t_customer")
 public class Customer {
 
+    @Id
+    @GeneratedValue
     private Long id;
 
+    @Column(name = "user_name")
     private String username;
 
     private String password;
 
     private String role;
+
+    @Column(name = "amount")
+    private String amount;
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
 
     public Long getId() {
         return id;
